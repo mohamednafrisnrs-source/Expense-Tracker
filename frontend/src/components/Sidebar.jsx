@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Receipt, LineChart, Plus, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Receipt, LineChart, Plus, Menu, X, LogOut } from 'lucide-react';
+import { AuthContext } from '../contexts/AuthContext';
 import './Sidebar.css';
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { user, logout } = useContext(AuthContext);
 
   const closeSidebar = () => setIsMobileOpen(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <>
@@ -77,6 +84,24 @@ const Sidebar = () => {
             <Plus size={18} />
             <span>Quick Add</span>
           </button>
+
+          {user && (
+            <div className="sidebar-user-section">
+              <div className="user-info">
+                <div className="user-avatar">
+                  {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div className="user-details">
+                  <span className="user-name">{user.name}</span>
+                  <span className="user-email">{user.email}</span>
+                </div>
+              </div>
+              <button className="logout-btn" onClick={handleLogout}>
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
         </div>
       </aside>
     </>

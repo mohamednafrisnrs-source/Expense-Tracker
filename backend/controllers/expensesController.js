@@ -31,8 +31,8 @@ function getAllExpenses(req, res, next) {
     const limit = Math.max(1, parseInt(req.query.limit) || 10);
     const offset = (page - 1) * limit;
 
-    let conditions = [];
-    let params     = [];
+    let conditions = ["user_id = ?"];
+    let params     = [req.user.id];
 
     if (search) {
       conditions.push("title LIKE ?");
@@ -69,7 +69,7 @@ function getAllExpenses(req, res, next) {
 // ─── GET /api/expenses/:id ─────────────────────────────────────────────────────
 function getExpenseById(req, res, next) {
   try {
-    const expense = db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id);
+    const expense = db.prepare('SELECT * FROM expenses WHERE id = ? AND user_id = ?').get(req.params.id, req.user.id);
     if (!expense) {
       return res.status(404).json({ error: 'Expense not found' });
     }
@@ -90,11 +90,11 @@ function createExpense(req, res, next) {
     const { title, amount, category, date, note = null } = req.body;
 
     const result = db.prepare(`
-      INSERT INTO expenses (title, amount, category, date, note)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(title.trim(), amount, category, date, note);
+      INSERT INTO expenses (title, amount, category, date, note, user_id)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(title.trim(), amount, category, date, note, req.user.id);
 
-    const created = db.prepare('SELECT * FROM expenses WHERE id = ?').get(result.lastInsertRowid);
+    const created = db.prepare('SELECT * FROM expenses WHERE id = ? AND user_id = ?').get(result.lastInsertRowid, req.user.id);
     res.status(201).json(created);
   } catch (err) {
     next(err);
@@ -104,7 +104,7 @@ function createExpense(req, res, next) {
 // ─── PUT /api/expenses/:id ─────────────────────────────────────────────────────
 function updateExpense(req, res, next) {
   try {
-    const existing = db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id);
+    const existing = db.prepare('SELECT * FROM expenses WHERE id = ? AND user_id = ?').get(req.params.id, req.user.id);
     if (!existing) {
       return res.status(404).json({ error: 'Expense not found' });
     }
@@ -119,10 +119,10 @@ function updateExpense(req, res, next) {
     db.prepare(`
       UPDATE expenses
       SET title = ?, amount = ?, category = ?, date = ?, note = ?
-      WHERE id = ?
-    `).run(title.trim(), amount, category, date, note, req.params.id);
+      WHERE id = ? AND user_id = ?
+    `).run(title.trim(), amount, category, date, note, req.params.id, req.user.id);
 
-    const updated = db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id);
+    const updated = db.prepare('SELECT * FROM expenses WHERE id = ? AND user_id = ?').get(req.params.id, req.user.id);
     res.json(updated);
   } catch (err) {
     next(err);
@@ -132,12 +132,12 @@ function updateExpense(req, res, next) {
 // ─── DELETE /api/expenses/:id ──────────────────────────────────────────────────
 function deleteExpense(req, res, next) {
   try {
-    const existing = db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id);
+    const existing = db.prepare('SELECT * FROM expenses WHERE id = ? AND user_id = ?').get(req.params.id, req.user.id);
     if (!existing) {
       return res.status(404).json({ error: 'Expense not found' });
     }
 
-    db.prepare('DELETE FROM expenses WHERE id = ?').run(req.params.id);
+    db.prepare('DELETE FROM expenses WHERE id = ? AND user_id = ?').run(req.params.id, req.user.id);
     res.json({ message: 'Expense deleted successfully' });
   } catch (err) {
     next(err);
@@ -162,10 +162,10 @@ function getMonthlySummary(req, res, next) {
              SUM(amount)            AS total,
              COUNT(*)               AS count
       FROM expenses
-      WHERE strftime('%Y-%m', date) >= ?
+      WHERE strftime('%Y-%m', date) >= ? AND user_id = ?
       GROUP BY month
       ORDER BY month ASC
-    `).all(months[0]);
+    `).all(months[0], req.user.id);
 
     // Merge with the full 12-month skeleton so months with no data appear as 0
     const rowMap = {};
@@ -191,9 +191,10 @@ function getCategorySummary(req, res, next) {
              SUM(amount) AS total,
              COUNT(*)    AS count
       FROM expenses
+      WHERE user_id = ?
       GROUP BY category
       ORDER BY total DESC
-    `).all();
+    `).all(req.user.id);
 
     const grandTotal = rows.reduce((sum, r) => sum + r.total, 0);
 
@@ -232,21 +233,21 @@ function getDashboardSummary(req, res, next) {
     const toISO = (d) => d.toISOString().split('T')[0];
 
     // Total of ALL expenses
-    const totalRow = db.prepare('SELECT SUM(amount) AS total FROM expenses').get();
+    const totalRow = db.prepare('SELECT SUM(amount) AS total FROM expenses WHERE user_id = ?').get(req.user.id);
     const totalExpenses = parseFloat((totalRow.total || 0).toFixed(2));
 
     // Total for current calendar month
     const thisMonthRow = db.prepare(`
       SELECT SUM(amount) AS total FROM expenses
-      WHERE strftime('%Y-%m', date) = ?
-    `).get(thisMonth);
+      WHERE strftime('%Y-%m', date) = ? AND user_id = ?
+    `).get(thisMonth, req.user.id);
     const thisMonthTotal = parseFloat((thisMonthRow.total || 0).toFixed(2));
 
     // This week total (Mon–today)
     const thisWeekRow = db.prepare(`
       SELECT SUM(amount) AS total FROM expenses
-      WHERE date >= ? AND date <= ?
-    `).get(toISO(monday), toISO(now));
+      WHERE date >= ? AND date <= ? AND user_id = ?
+    `).get(toISO(monday), toISO(now), req.user.id);
     const thisWeekTotal = parseFloat((thisWeekRow.total || 0).toFixed(2));
 
     // Last week total
@@ -254,8 +255,8 @@ function getDashboardSummary(req, res, next) {
     lastWeekEnd.setDate(monday.getDate() - 1);
     const lastWeekRow = db.prepare(`
       SELECT SUM(amount) AS total FROM expenses
-      WHERE date >= ? AND date <= ?
-    `).get(toISO(lastMonday), toISO(lastWeekEnd));
+      WHERE date >= ? AND date <= ? AND user_id = ?
+    `).get(toISO(lastMonday), toISO(lastWeekEnd), req.user.id);
     const lastWeekTotal = parseFloat((lastWeekRow.total || 0).toFixed(2));
 
     // Weekly change percent
@@ -269,10 +270,11 @@ function getDashboardSummary(req, res, next) {
     // Highest spending category
     const catRow = db.prepare(`
       SELECT category, SUM(amount) AS total FROM expenses
+      WHERE user_id = ?
       GROUP BY category ORDER BY total DESC LIMIT 1
-    `).get();
+    `).get(req.user.id);
 
-    const grandTotalRow = db.prepare('SELECT SUM(amount) AS total FROM expenses').get();
+    const grandTotalRow = db.prepare('SELECT SUM(amount) AS total FROM expenses WHERE user_id = ?').get(req.user.id);
     const grandTotal    = grandTotalRow.total || 0;
 
     const highestCategory = catRow
@@ -283,12 +285,12 @@ function getDashboardSummary(req, res, next) {
       : null;
 
     // Total records
-    const totalRecords = db.prepare('SELECT COUNT(*) AS count FROM expenses').get().count;
+    const totalRecords = db.prepare('SELECT COUNT(*) AS count FROM expenses WHERE user_id = ?').get(req.user.id).count;
 
     // 5 most recent expenses
     const recentExpenses = db.prepare(`
-      SELECT * FROM expenses ORDER BY date DESC, id DESC LIMIT 5
-    `).all();
+      SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC, id DESC LIMIT 5
+    `).all(req.user.id);
 
     res.json({
       totalExpenses,

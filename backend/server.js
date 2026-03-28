@@ -1,7 +1,7 @@
 const express        = require('express');
 const cors           = require('cors');
 const expenseRoutes  = require('./routes/expenses');
-
+const authRoutes     = require('./routes/auth');
 // Initialize the database (creates tables + seeds data on first run)
 require('./database');
 
@@ -20,6 +20,7 @@ app.use(cors({
 app.use(express.json());
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
+app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
 
 // ─── 404 catch-all for unknown routes ─────────────────────────────────────────

@@ -1,6 +1,10 @@
 const express = require('express');
 const router  = express.Router();
 const ctrl    = require('../controllers/expensesController');
+const auth    = require('../middleware/auth');
+
+// Apply auth middleware to all routes in this router
+router.use(auth);
 
 // Summary routes MUST be declared before /:id to avoid "summary" being treated as an ID
 router.get('/summary/monthly',   ctrl.getMonthlySummary);
