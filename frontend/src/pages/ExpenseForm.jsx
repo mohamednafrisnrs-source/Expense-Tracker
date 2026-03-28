@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getHeaders } from '../services/api';
 import './ExpenseForm.css';
 
 const CATEGORIES = [
@@ -26,8 +27,12 @@ const ExpenseForm = () => {
 
   useEffect(() => {
     if (isEditing) {
-      fetch(`/api/expenses/${id}`)
+      fetch(`/api/expenses/${id}`, { headers: getHeaders() })
         .then(res => {
+          if (res.status === 401) {
+            navigate('/login');
+            throw new Error('Unauthorized');
+          }
           if (!res.ok) throw new Error('Failed to fetch expense');
           return res.json();
         })
@@ -78,12 +83,15 @@ const ExpenseForm = () => {
     try {
       const res = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: getHeaders(),
         body: JSON.stringify(payload)
       });
       
+      if (res.status === 401) {
+        navigate('/login');
+        return;
+      }
+
       const data = await res.json();
       
       if (res.ok) {

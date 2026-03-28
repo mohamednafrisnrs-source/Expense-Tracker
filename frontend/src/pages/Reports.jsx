@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Download, TrendingDown, ArrowDownRight, ArrowUpRight, Utensils } from 'lucide-react';
+import { getHeaders } from '../services/api';
 import './Reports.css';
 
 const Reports = () => {
@@ -11,11 +13,20 @@ const Reports = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const handleResponse = res => {
+      if (res.status === 401) {
+        navigate('/login');
+        throw new Error('Unauthorized');
+      }
+      return res.json();
+    };
+
     Promise.all([
-      fetch('/api/expenses?limit=100000').then(res => res.json()),
-      fetch('/api/expenses/summary/dashboard').then(res => res.json())
+      fetch('/api/expenses?limit=100000', { headers: getHeaders() }).then(handleResponse),
+      fetch('/api/expenses/summary/dashboard', { headers: getHeaders() }).then(handleResponse)
     ])
       .then(([expRes, dash]) => {
         const allExpenses = expRes.data || [];
@@ -94,7 +105,11 @@ const Reports = () => {
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      const res = await fetch('/api/expenses?limit=100000');
+      const res = await fetch('/api/expenses?limit=100000', { headers: getHeaders() });
+      if (res.status === 401) {
+        navigate('/login');
+        return;
+      }
       const result = await res.json();
       const allExpenses = result.data || [];
       

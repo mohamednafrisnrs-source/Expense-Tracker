@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getHeaders } from '../services/api';
 import { Search, Edit2, Trash2, Filter, ChevronRight, ChevronLeft, Bell, HelpCircle, Utensils, Bus, Home, ShoppingCart, ShoppingBag, Coffee, BookOpen, HeartPulse, Film, MoreHorizontal } from 'lucide-react';
 import './Expenses.css';
 
@@ -45,8 +46,14 @@ const Expenses = () => {
     params.append('page', page);
     params.append('limit', 10);
 
-    fetch(`/api/expenses?${params.toString()}`)
-      .then(res => res.json())
+    fetch(`/api/expenses?${params.toString()}`, { headers: getHeaders() })
+      .then(res => {
+        if (res.status === 401) {
+          navigate('/login');
+          throw new Error('Unauthorized');
+        }
+        return res.json();
+      })
       .then(data => {
         setExpenses(data.data);
         setTotalPages(data.totalPages);
@@ -75,7 +82,14 @@ const Expenses = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this expense?")) return;
     try {
-      const res = await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/expenses/${id}`, { 
+        method: 'DELETE',
+        headers: getHeaders()
+      });
+      if (res.status === 401) {
+        navigate('/login');
+        return;
+      }
       if (res.ok) {
         fetchExpenses();
       } else {

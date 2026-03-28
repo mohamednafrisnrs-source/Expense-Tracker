@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { getHeaders } from '../services/api';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
@@ -14,12 +15,21 @@ const Dashboard = () => {
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const handleResponse = res => {
+      if (res.status === 401) {
+        navigate('/login');
+        throw new Error('Unauthorized');
+      }
+      return res.json();
+    };
+
     Promise.all([
-      fetch('/api/expenses/summary/dashboard').then(res => res.json()),
-      fetch('/api/expenses/summary/monthly').then(res => res.json()),
-      fetch('/api/expenses/summary/category').then(res => res.json())
+      fetch('/api/expenses/summary/dashboard', { headers: getHeaders() }).then(handleResponse),
+      fetch('/api/expenses/summary/monthly', { headers: getHeaders() }).then(handleResponse),
+      fetch('/api/expenses/summary/category', { headers: getHeaders() }).then(handleResponse)
     ])
       .then(([dash, month, cat]) => {
         setDashboardData(dash);
