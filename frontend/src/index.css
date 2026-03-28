@@ -70,8 +70,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Global Media Query Breakpoints */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 @media (max-width: 768px) {
   :root {
     --sidebar-width: 250px;
+  }
+  html {
+    font-size: 14px;
   }
 }
