@@ -93,7 +93,7 @@ const Expenses = () => {
         <div className="header-actions">
           <button className="icon-btn"><Bell size={20} /></button>
           <button className="icon-btn"><HelpCircle size={20} /></button>
-          <button className="btn btn-primary" onClick={() => navigate('/expenses/new')}>Add Expense</button>
+          <button className="btn btn-primary add-expense-btn" onClick={() => navigate('/expenses/new')}>Add Expense</button>
         </div>
       </header>
 
@@ -141,9 +141,9 @@ const Expenses = () => {
                 <thead>
                   <tr>
                     <th>TRANSACTION</th>
-                    <th>CATEGORY</th>
+                    <th className="hide-mobile">CATEGORY</th>
                     <th>AMOUNT</th>
-                    <th>DATE</th>
+                    <th className="hide-mobile">DATE</th>
                     <th className="text-right">ACTIONS</th>
                   </tr>
                 </thead>
@@ -156,13 +156,13 @@ const Expenses = () => {
                           {exp.title}
                         </div>
                       </td>
-                      <td>
+                      <td className="hide-mobile">
                         <div className="category-badge">{exp.category}</div>
                       </td>
                       <td className="font-medium">
                         Rs. {exp.amount.toFixed(2)}
                       </td>
-                      <td className="text-muted">
+                      <td className="text-muted hide-mobile">
                         {new Date(exp.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}
                       </td>
                       <td className="text-right">

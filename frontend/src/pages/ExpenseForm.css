@@ -94,3 +94,20 @@ textarea.form-control {
 .btn-cancel:hover {
   color: var(--text-primary);
 }
+
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .form-actions {
+    flex-direction: column;
+  }
+  .btn-cancel, .btn-primary {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  input[type="date"] {
+    width: 100% !important;
+  }
+}

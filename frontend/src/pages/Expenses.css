@@ -139,3 +139,32 @@
 
 .p-8 { padding: 2rem; }
 .text-center { text-align: center; }
+
+@media (max-width: 768px) {
+  .filters-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .search-box {
+    width: 100%;
+  }
+  .filters-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hide-mobile {
+    display: none;
+  }
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .header-actions {
+    width: 100%;
+  }
+  .add-expense-btn {
+    width: 100%;
+  }
+}

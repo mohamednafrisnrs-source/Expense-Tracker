@@ -68,3 +68,14 @@ h1, h2, h3, h4, h5, h6 {
 .text-muted {
   color: var(--text-muted);
 }
+
+/* Global Media Query Breakpoints */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Small mobile specific */
+}
