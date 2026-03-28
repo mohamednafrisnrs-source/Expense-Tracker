@@ -81,6 +81,9 @@
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   align-items: center;
   justify-content: center;
+  color: var(--text-primary);
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 
 .sidebar-overlay {
