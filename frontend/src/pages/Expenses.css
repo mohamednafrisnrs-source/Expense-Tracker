@@ -163,8 +163,9 @@
   }
   .header-actions {
     width: 100%;
+    justify-content: flex-end;
   }
   .add-expense-btn {
-    width: 100%;
+    width: auto;
   }
 }
