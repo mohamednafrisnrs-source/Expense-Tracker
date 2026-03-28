@@ -1,0 +1,122 @@
+.reports-page {
+  animation: fadeIn 0.3s ease;
+  max-width: 900px;
+}
+
+.text-sm { font-size: 0.875rem; }
+.text-lg { font-size: 1.125rem; }
+.cursor-pointer { cursor: pointer; }
+
+.chart-card {
+  padding: 1.5rem;
+}
+
+.chart-toggles {
+  display: flex;
+  background-color: #f4f4f4;
+  border-radius: 9999px;
+  padding: 0.25rem;
+}
+
+.toggle-btn {
+  padding: 0.25rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.toggle-btn.active {
+  background-color: white;
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.dark-card {
+  background-color: #1a1a1a;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.insight-icon {
+  width: 48px;
+  height: 48px;
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.insight-content h3 {
+  color: white;
+  font-size: 1.125rem;
+  margin-bottom: 0.25rem;
+}
+
+.text-gray {
+  color: #a0a0a0;
+}
+
+.months-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.month-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background-color: #e5e5e5; /* The mockup has a grayish background for these rows */
+}
+
+/* Override purely for these specific cards based on design */
+.month-row.card {
+  box-shadow: none;
+}
+
+.month-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.calendar-icon {
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.cal-top {
+  height: 10px;
+  background-color: #111;
+}
+
+.cal-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #111;
+}
