@@ -9,7 +9,14 @@ const app  = express();
 const PORT = 3000;
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://expense-tracker-rosy.vercel.app'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
